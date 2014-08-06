@@ -1,0 +1,167 @@
+me="CodeIgniter Project" basedir="." default="all">
+
+	<!-- Don't change me. -->
+	<property name="phing_dir_name" value="etc/phing" />
+	<property name="phpcs_dir_name" value="${phing_dir_name}/phpcs" />
+	<property name="phpmd_dir_name" value="${phing_dir_name}/phpmd" />
+	<property name="phpcpd_dir_name" value="${phing_dir_name}/phpcpd" />
+	<property name="pdepend_dir_name" value="${phing_dir_name}/pdepend" />
+	<property name="phploc_dir_name" value="${phing_dir_name}/phploc" />
+	<property name="phpdoc_dir_name" value="${phing_dir_name}/phpdoc" />
+	<property name="zip_dir_name" value="${phing_dir_name}/zip" />
+
+	<!-- Change me. -->
+	<!--property name="target_dir_name" value="/x/develop/gakuen/hamamoto/gakuen" /-->
+	<property name="target_dir_name" value="${basedir}" />
+	<property name="phpunit_dir_name" value="${target_dir_name}/etc/phing/phpunit" />
+	<property name="phpcs_standard" value="CodeIgniter" />
+	<property name="phpmd_rules" value="codesize,design,unusedcode" />
+
+	<target name="init">
+		<delete dir="${phing_dir_name}" includeemptydirs="true" />
+		<mkdir dir="${phing_dir_name}" />
+	</target>
+
+	<target name="unit">
+		<exec command="
+			phpunit --tap -vc ${target_dir_name}/lib/tests/phpunit.xml
+		"/>
+	</target>
+
+	<target name="phpcs">
+		<mkdir dir="${phpcs_dir_name}" />
+		<!-- hide phpcs command E_NOTICE (& all console output) -->
+		<exec output="${phpcs_dir_name}/phpcs.log" dir="." command="
+			phpcs
+			--standard=${phpcs_standard}
+			--report-checkstyle=${phpcs_dir_name}/checkstyle.xml
+			--ignore=third_party,templates_c/sp
+			${target_dir_name}/lib/application
+		"/>
+	</target>
+
+	<target name="phpmd">
+		<mkdir dir="${phpmd_dir_name}" />
+		<exec dir="." command="
+			phpmd
+			${target_dir_name}/lib/application
+			xml
+			${phpmd_rules}
+			--reportfile ${phpmd_dir_name}/pmd.xml
+			--exclude third_party,templates_c/sp
+		"/>
+	</target>
+
+	<target name="phpcpd">
+		<mkdir dir="${phpcpd_dir_name}" />
+		<exec dir="." command="
+			phpcpd
+			--quiet
+			--log-pmd ${phpcpd_dir_name}/cpd.xml
+			--exclude third_party
+			--exclude templates_c/sp
+			${target_dir_name}/lib/application
+		"/>
+	</target>
+
+	<target name="phpunit-model">
+		<mkdir dir="${phpunit_dir_name}" />
+		<exec timeout="300000" dir="." command="
+			phpunit
+			--tap
+			--testsuite ModelTests
+			-c ${target_dir_name}/lib/tests/phpunit.xml
+			--log-junit ${phpunit_dir_name}/junit_model.xml
+		"/>
+	</target>
+
+	<target name="phpunit-lib">
+		<mkdir dir="${phpunit_dir_name}" />
+		<exec timeout="300000" dir="." command="
+			phpunit
+			--tap
+			--testsuite LibTests
+			-c ${target_dir_name}/lib/tests/phpunit.xml
+			--log-junit ${phpunit_dir_name}/junit_lib.xml
+		"/>
+	</target>
+
+	<target name="phpunit-controller">
+		<mkdir dir="${phpunit_dir_name}" />
+		<exec timeout="600000" dir="." command="
+			phpunit
+			--tap
+			--testsuite ControllerTests
+			-c ${target_dir_name}/lib/tests/phpunit.xml
+			--log-junit ${phpunit_dir_name}/junit_controller.xml
+		"/>
+	</target>
+
+	<!-- Use for alternative phpunit-controller target -->
+	<target name="phpunit-controller-coverage">
+		<mkdir dir="${phpunit_dir_name}" />
+		<exec timeout="600000" dir="." command="
+			phpunit
+			--tap
+			--testsuite ControllerTests
+			-c ${target_dir_name}/lib/tests/phpunit.xml
+			--coverage-html ${phpunit_dir_name}/html
+			--coverage-clover ${phpunit_dir_name}/clover_controller.xml
+			--log-junit ${phpunit_dir_name}/junit_controller.xml
+		"/>
+	</target>
+
+	<target name="phpunit">
+		<mkdir dir="${phpunit_dir_name}" />
+		<exec dir="." command="
+			phpunit
+			--tap
+			-c ${target_dir_name}/lib/tests/phpunit.xml
+			--coverage-html ${phpunit_dir_name}/html
+			--coverage-clover ${phpunit_dir_name}/clover.xml
+			--log-junit ${phpunit_dir_name}/junit.xml
+		"/>
+	</target>
+
+	<target name="pdepend">
+		<mkdir dir="${pdepend_dir_name}" />
+		<exec dir="." command="
+			pdepend
+			--jdepend-xml=${pdepend_dir_name}/jdepend.xml
+			--ignore=third_party,templates_c/sp
+			${target_dir_name}/lib/application
+		"/>
+	</target>
+
+	<target name="phploc">
+		<mkdir dir="${phploc_dir_name}" />
+		<exec dir="." command="
+			phploc
+			--log-csv ${phploc_dir_name}/plot.csv
+			--exclude third_party
+			--exclude templates_c/sp
+			${target_dir_name}/lib/application
+		"/>
+	</target>
+
+	<target name="phpdoc">
+		<exec executable="which" outputproperty="phpdoc_bin">
+			<arg value="phpdoc" />
+		</exec>
+		<mkdir dir="${phpdoc_dir_name}" />
+		<!-- suppress E_STRICT, E_NOTICE. E_ALL ^ E_STRICT ^ E_NOTICE == 30711 -->
+		<exec dir="." command="
+			php -d error_reporting=30711 ${phpdoc_bin} -q
+			-d ${target_dir_name}/lib/application/controllers,${target_dir_name}/lib/application/libraries,${target_dir_name}/lib/application/models,${target_dir_name}/lib_batch/application/controllers
+			-t ${phpdoc_dir_name}/
+		"/>
+	</target>
+
+	<target name="zip">
+		<mkdir dir="${zip_dir_name}/tmp" />
+		<exec dir="." command="zip -r ${zip_dir_name}/phpdoc.zip ${phing_dir_name}/phpdoc" />
+	</target>
+
+	<target name="all" depends="init,phpcs,phpmd,phpcpd,phpunit,pdepend,phploc,phpdoc,zip" />
+
+</project>

@@ -1,0 +1,34 @@
+add test
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#	new file:   .build.xml
+#	new file:   application/third_party/CIUnit
+#	new file:   tests/controllers/CI_Unit_Test_class_Test.php
+#	new file:   tests/controllers/SomeControllerTest.php
+#	new file:   tests/controllers/welcomeTest.php
+#	new file:   tests/fixtures/Controller_fixt.php
+#	new file:   tests/fixtures/Controller_fixt2.php
+#	new file:   tests/fixtures/phone_carrier_fixt.yml
+#	new file:   tests/fixtures/view_fixt.php
+#	new file:   tests/fixtures/view_fixt2.php
+#	new file:   tests/generate
+#	new file:   tests/generate.php
+#	new file:   tests/getops.php
+#	new file:   tests/helpers/HelperTest.php
+#	new file:   tests/libs/SomeLibTest.php
+#	new file:   tests/models/PhoneCarrierModelTest.php
+#	new file:   tests/models/SomeModelTest.php
+#	new file:   tests/phpunit.xml.dist
+#	new file:   tests/system/PHPTest.php
+#
+# Changed but not updated:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#   (commit or discard the untracked or modified content in submodules)
+#
+#	modified:   application/third_party/CIUnit (modified content, untracked content)
+#
